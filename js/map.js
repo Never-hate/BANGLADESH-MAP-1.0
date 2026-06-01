@@ -1,3 +1,8 @@
+/**
+ * Bangladesh Interactive Map Logic
+ * Handles GeoJSON loading, hover animations, and click events.
+ */
+
 const map = L.map('map', { 
     zoomControl: false, 
     attributionControl: false 
@@ -5,6 +10,7 @@ const map = L.map('map', {
 
 let geoJsonLayer;
 
+// ম্যাপের স্টাইল নির্ধারণ
 function getStyle() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     return { 
@@ -15,34 +21,51 @@ function getStyle() {
     };
 }
 
+// প্রতিটি জেলার জন্য ইভেন্ট লিসেনার
 function onEachFeature(feature, layer) {
-    // নতুন HDX ফাইলের জন্য ADM2_EN ব্যবহার করা হলো
+    // জেলার নাম খোঁজা (ADM2_EN অথবা NAME_2)
     const districtName = feature.properties.ADM2_EN || feature.properties.NAME_2;
 
     if(districtName) {
-        layer.bindTooltip(districtName, { permanent: false, direction: 'center' });
+        layer.bindTooltip(districtName, { permanent: false, direction: 'center', className: 'map-tooltip' });
     }
 
     layer.on({
+        // মাউস নিলে কালার পরিবর্তন
         mouseover: (e) => { 
-            e.target.setStyle({ fillColor: '#7C3AED', fillOpacity: 0.9, color: '#F59E0B', weight: 3 }); 
-            e.target.bringToFront(); 
+            const layer = e.target;
+            layer.setStyle({ 
+                fillColor: '#7C3AED', 
+                fillOpacity: 0.9, 
+                color: '#F59E0B', 
+                weight: 3 
+            }); 
+            layer.bringToFront(); 
         },
+        // মাউস সরিয়ে নিলে কালার রিসেট
         mouseout: (e) => { 
-            geoJsonLayer.resetStyle(e.target); 
+            if (geoJsonLayer) {
+                geoJsonLayer.resetStyle(e.target); 
+            }
         },
+        // ক্লিক করলে ইনফরমেশন পাঠানো
         click: (e) => {
-            map.fitBounds(e.target.getBounds());
-            // সঠিক নামটি app.js কে পাঠানো হচ্ছে
-            document.dispatchEvent(new CustomEvent('districtSelected', { detail: { name: districtName } }));
+            if(districtName) {
+                map.fitBounds(e.target.getBounds());
+                document.dispatchEvent(new CustomEvent('districtSelected', { 
+                    detail: { name: districtName } 
+                }));
+            }
         }
     });
 }
 
+// ম্যাপ ডাটা লোড করা
 async function loadMap() {
     try {
-        // আপনার লোকাল map.json ফাইলটি কল করা হচ্ছে
-        const response = await fetch('./data/map.json');
+        const response = await fetch('./data/map.json'); // আপনার ফাইলের লোকেশন
+        if (!response.ok) throw new Error("Could not load map data");
+        
         const data = await response.json();
         
         geoJsonLayer = L.geoJSON(data, { 
@@ -50,14 +73,14 @@ async function loadMap() {
             onEachFeature: onEachFeature 
         }).addTo(map);
         
-        setTimeout(() => {
-            const loader = document.getElementById('loader');
-            if(loader) loader.classList.add('fade-out');
-        }, 800);
+        // লোডার সরিয়ে দেওয়া
+        const loader = document.getElementById('loader');
+        if(loader) loader.classList.add('fade-out');
 
     } catch (err) {
-        console.error("Map load error:", err);
+        console.error("Map initialization failed:", err);
     }
 }
 
+// ম্যাপ শুরু করা
 loadMap();
