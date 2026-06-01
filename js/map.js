@@ -22,48 +22,40 @@ function getStyle() {
 
 // জেলার নাম সেট করা এবং ক্লিক ইভেন্ট
 function onEachFeature(feature, layer) {
-    const districtName = feature.properties.adm2_name; 
+    // আপনার ফাইল অনুযায়ী সঠিক প্রপার্টি 'adm2_name' ব্যবহার করা হয়েছে
+    const districtName = feature.properties.adm2_name;
+
+    if(districtName) {
+        layer.bindTooltip(districtName, { permanent: false, direction: 'center', className: 'map-tooltip' });
+    }
 
     layer.on({
-        // মাউস নিলে যা যা হবে:
-        mouseover: (e) => { 
-            // ১. ম্যাপের কালার চেঞ্জ হবে
-            e.target.setStyle({ fillColor: '#7C3AED', fillOpacity: 0.9 }); 
-            e.target.bringToFront(); // বর্ডারগুলো ক্লিয়ার দেখানোর জন্য
 
-            // ২. মাউস নিলেই সাথে সাথে সাইডবারে ডাটা পাঠানোর সিগন্যাল (এটাই আপনার কাঙ্ক্ষিত ফিচার)
-            document.dispatchEvent(new CustomEvent('districtSelected', { 
-                detail: { name: districtName } 
-            }));
+        mouseover: (e) => { 
+            const layer = e.target;
+            layer.setStyle({ 
+                fillColor: '#7C3AED', 
+                fillOpacity: 0.9, 
+                color: '#F59E0B', 
+                weight: 3 
+            }); 
+            layer.bringToFront(); 
         },
-        // মাউস সরিয়ে নিলে কালার আগের মতো হয়ে যাবে
+
         mouseout: (e) => { 
-            if (geoJsonLayer) geoJsonLayer.resetStyle(e.target); 
+            if (geoJsonLayer) {
+                geoJsonLayer.resetStyle(e.target); 
+            }
         },
-        // ক্লিক করলে শুধু জুম হবে (কারণ ডাটা তো হোভার করলেই চলে যাচ্ছে)
+
         click: (e) => {
-            map.fitBounds(e.target.getBounds());
+            if(districtName) {
+                map.fitBounds(e.target.getBounds());
+                // app.js এ নাম পাঠানোর জন্য ইভেন্ট
+                document.dispatchEvent(new CustomEvent('districtSelected', { 
+                    detail: { name: districtName } 
+                }));
+            }
         }
     });
 }
-
-// ম্যাপ ডাটা লোড করা
-async function loadMap() {
-    try {
-        const response = await fetch('./data/map.json');
-        const data = await response.json();
-        
-        geoJsonLayer = L.geoJSON(data, { 
-            style: getStyle(), 
-            onEachFeature: onEachFeature 
-        }).addTo(map);
-        
-        const loader = document.getElementById('loader');
-        if(loader) loader.classList.add('fade-out');
-
-    } catch (err) {
-        console.error("Map load error:", err);
-    }
-}
-
-loadMap();
