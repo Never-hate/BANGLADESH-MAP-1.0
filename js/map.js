@@ -1,4 +1,8 @@
-const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([23.6850, 90.3563], 7);
+const map = L.map('map', { 
+    zoomControl: false, 
+    attributionControl: false 
+}).setView([23.6850, 90.3563], 7);
+
 let geoJsonLayer;
 
 function getStyle() {
@@ -12,9 +16,11 @@ function getStyle() {
 }
 
 function onEachFeature(feature, layer) {
-    // Tooltip showing district name
-    if(feature.properties && feature.properties.NAME_2) {
-        layer.bindTooltip(feature.properties.NAME_2, { permanent: false, direction: 'center' });
+    // নতুন HDX ফাইলের জন্য ADM2_EN ব্যবহার করা হলো
+    const districtName = feature.properties.ADM2_EN || feature.properties.NAME_2;
+
+    if(districtName) {
+        layer.bindTooltip(districtName, { permanent: false, direction: 'center' });
     }
 
     layer.on({
@@ -22,28 +28,34 @@ function onEachFeature(feature, layer) {
             e.target.setStyle({ fillColor: '#7C3AED', fillOpacity: 0.9, color: '#F59E0B', weight: 3 }); 
             e.target.bringToFront(); 
         },
-        mouseout: (e) => { geoJsonLayer.resetStyle(e.target); },
+        mouseout: (e) => { 
+            geoJsonLayer.resetStyle(e.target); 
+        },
         click: (e) => {
             map.fitBounds(e.target.getBounds());
-            // Send the district name to app.js
-            document.dispatchEvent(new CustomEvent('districtSelected', { detail: { name: feature.properties.NAME_2 } }));
+            // সঠিক নামটি app.js কে পাঠানো হচ্ছে
+            document.dispatchEvent(new CustomEvent('districtSelected', { detail: { name: districtName } }));
         }
     });
 }
 
 async function loadMap() {
     try {
-        // Fetching local map.json
+        // আপনার লোকাল map.json ফাইলটি কল করা হচ্ছে
         const response = await fetch('./data/map.json');
         const data = await response.json();
         
-        geoJsonLayer = L.geoJSON(data, { style: getStyle(), onEachFeature: onEachFeature }).addTo(map);
+        geoJsonLayer = L.geoJSON(data, { 
+            style: getStyle(), 
+            onEachFeature: onEachFeature 
+        }).addTo(map);
         
         setTimeout(() => {
-            document.getElementById('loader').classList.add('fade-out');
+            const loader = document.getElementById('loader');
+            if(loader) loader.classList.add('fade-out');
         }, 800);
+
     } catch (err) {
-        document.querySelector('.loader-container h2').innerText = "Please add data/map.json file!";
         console.error("Map load error:", err);
     }
 }
