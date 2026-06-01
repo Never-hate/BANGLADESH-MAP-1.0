@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bangladesh Geo Explorer</title>
+    <meta name="description" content="Premium interactive map of Bangladesh administrative districts.">
+    
+    <!-- Open Graph / SEO -->
+    <meta property="og:title" content="Bangladesh Geo Explorer">
+    <meta property="og:description" content="Explore the 64 districts of Bangladesh with interactive maps and statistics.">
+    
+    <!-- Leaflet CSS for Map Rendering -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Project Styles -->
+    <link rel="stylesheet" href="./css/animation.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loader" class="loader-container">
+        <div class="bd-spinner"></div>
+        <h2>Loading Bangladesh Map...</h2>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-nav">
+        <div class="nav-brand">
+            <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <h1>Bangladesh Map</h1>
+        </div>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search district..." aria-label="Search Districts">
+        </div>
+
+        <div class="nav-controls">
+            <button id="themeToggle" class="btn-icon" aria-label="Toggle Theme">🌓</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="dashboard">
+        <!-- Stats -->
+        <div class="stats-container">
+            <div class="stat-card glass-panel">
+                <p>Divisions</p>
+                <h3 class="counter" data-target="8">0</h3>
+            </div>
+            <div class="stat-card glass-panel">
+                <p>Districts</p>
+                <h3 class="counter" data-target="64">0</h3>
+            </div>
+            <div class="stat-card glass-panel">
+                <p>Upazilas</p>
+                <h3 class="counter" data-target="495">0</h3>
+            </div>
+        </div>
+
+        <!-- Map Container -->
+        <div id="map"></div>
+
+        <!-- Info Panel (Updated with Geo Location & Upazilas) -->
+        <aside id="infoPanel" class="info-panel glass-panel closed">
+            <button id="closePanel" class="btn-icon">✕</button>
+            <div class="panel-header">
+                <h2 id="dName">District Name</h2>
+                <h3 id="dBnName" class="bn-text">জেলা</h3>
+            </div>
+            <div class="panel-content">
+                <div class="info-row"><span>Division:</span> <span id="dDivision">...</span></div>
+                <div class="info-row"><span>Area:</span> <span id="dArea">...</span> sq km</div>
+                <div class="info-row"><span>Population:</span> <span id="dPop">...</span></div>
+                <div class="info-row"><span>Geo Location:</span> <span id="dGeo" style="color: var(--secondary); font-size: 0.9rem;">...</span></div>
+                
+                <!-- Upazila List Section -->
+                <div class="info-column mt-2">
+                    <span style="color: var(--accent); font-weight: bold; margin-bottom: 10px; display: block;">
+                        Upazilas (<span id="dUpazilaCount">0</span>):
+                    </span>
+                    <ul id="dUpazilaList" class="upazila-list">
+                        <!-- JS will insert upazilas here -->
+                    </ul>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Project Scripts -->
+    <script src="./js/theme.js"></script>
+    <script src="./js/map.js"></script>
+    <script src="./js/app.js"></script>
+</body>
+</html>
