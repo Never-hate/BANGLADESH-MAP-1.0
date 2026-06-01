@@ -22,37 +22,27 @@ function getStyle() {
 
 // জেলার নাম সেট করা এবং ক্লিক ইভেন্ট
 function onEachFeature(feature, layer) {
-    // আপনার ফাইল অনুযায়ী সঠিক প্রপার্টি 'adm2_name' ব্যবহার করা হয়েছে
-    const districtName = feature.properties.adm2_name;
-
-    if(districtName) {
-        layer.bindTooltip(districtName, { permanent: false, direction: 'center', className: 'map-tooltip' });
-    }
+    const districtName = feature.properties.adm2_name; 
 
     layer.on({
+        // মাউস নিলে যা যা হবে:
         mouseover: (e) => { 
-            const layer = e.target;
-            layer.setStyle({ 
-                fillColor: '#7C3AED', 
-                fillOpacity: 0.9, 
-                color: '#F59E0B', 
-                weight: 3 
-            }); 
-            layer.bringToFront(); 
+            // ১. ম্যাপের কালার চেঞ্জ হবে
+            e.target.setStyle({ fillColor: '#7C3AED', fillOpacity: 0.9 }); 
+            e.target.bringToFront(); // বর্ডারগুলো ক্লিয়ার দেখানোর জন্য
+
+            // ২. মাউস নিলেই সাথে সাথে সাইডবারে ডাটা পাঠানোর সিগন্যাল (এটাই আপনার কাঙ্ক্ষিত ফিচার)
+            document.dispatchEvent(new CustomEvent('districtSelected', { 
+                detail: { name: districtName } 
+            }));
         },
+        // মাউস সরিয়ে নিলে কালার আগের মতো হয়ে যাবে
         mouseout: (e) => { 
-            if (geoJsonLayer) {
-                geoJsonLayer.resetStyle(e.target); 
-            }
+            if (geoJsonLayer) geoJsonLayer.resetStyle(e.target); 
         },
+        // ক্লিক করলে শুধু জুম হবে (কারণ ডাটা তো হোভার করলেই চলে যাচ্ছে)
         click: (e) => {
-            if(districtName) {
-                map.fitBounds(e.target.getBounds());
-                // app.js এ নাম পাঠানোর জন্য ইভেন্ট
-                document.dispatchEvent(new CustomEvent('districtSelected', { 
-                    detail: { name: districtName } 
-                }));
-            }
+            map.fitBounds(e.target.getBounds());
         }
     });
 }
