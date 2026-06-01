@@ -1,0 +1,64 @@
+:root {
+    --bg-color: #050816;
+    --primary: #7C3AED;
+    --secondary: #06B6D4;
+    --accent: #F59E0B;
+    --text-main: #FFFFFF;
+    --text-muted: #9CA3AF;
+    --glass-bg: rgba(20, 20, 35, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] {
+    --bg-color: #F8FAFC;
+    --text-main: #0F172A;
+    --text-muted: #475569;
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+body { background: var(--bg-color); color: var(--text-main); overflow: hidden; transition: background 0.3s; }
+
+.glass-nav, .glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+}
+
+.glass-nav { display: flex; justify-content: space-between; padding: 1rem 2rem; position: fixed; top: 0; width: 100%; z-index: 1000; align-items: center; }
+.nav-brand { display: flex; align-items: center; gap: 10px; color: var(--primary); }
+.nav-brand svg { width: 30px; }
+.search-container input { padding: 0.8rem 1.5rem; border-radius: 50px; border: 1px solid var(--glass-border); background: rgba(255,255,255,0.05); color: var(--text-main); width: 300px; outline: none; transition: 0.3s;}
+.search-container input:focus { border-color: var(--primary); }
+.btn-icon { background: none; border: none; font-size: 1.5rem; cursor: pointer; transition: 0.2s; }
+.btn-icon:hover { transform: scale(1.1); }
+
+.dashboard { height: 100vh; padding-top: 70px; position: relative; }
+#map { height: 100%; width: 100%; background: transparent !important; }
+
+.stats-container { position: absolute; bottom: 2rem; left: 2rem; display: flex; gap: 1rem; z-index: 500; pointer-events: none; }
+.stat-card { padding: 1.2rem 1.5rem; border-radius: 16px; text-align: center; }
+.stat-card p { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
+.stat-card h3 { color: var(--secondary); font-size: 1.5rem; }
+
+.info-panel { position: absolute; top: 90px; right: 2rem; width: 360px; height: calc(100vh - 120px); border-radius: 24px; padding: 2rem; z-index: 600; transform: translateX(0); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); overflow-y: auto; }
+.info-panel.closed { transform: translateX(120%); }
+#closePanel { position: absolute; top: 1.5rem; right: 1.5rem; color: var(--text-main); }
+.panel-header { border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+.info-row { display: flex; justify-content: space-between; margin-bottom: 0.8rem; font-size: 0.95rem; }
+.mt-2 { margin-top: 1.5rem; }
+
+/* Upazila Badge Styles */
+.upazila-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.upazila-list li { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); padding: 5px 12px; border-radius: 50px; font-size: 0.8rem; color: var(--text-main); transition: background 0.2s, transform 0.2s; cursor: default; }
+.upazila-list li:hover { background: var(--primary); transform: translateY(-2px); color: #fff; }
+
+@media (max-width: 768px) {
+    .glass-nav { flex-direction: column; gap: 10px; padding: 1rem; }
+    .stats-container { display: none; }
+    .info-panel { width: 100%; right: 0; bottom: 0; top: auto; height: 60vh; border-radius: 24px 24px 0 0; }
+    .info-panel.closed { transform: translateY(100%); }
+}
