@@ -1,64 +1,54 @@
 let districtData = [];
 
-// ১. JSON থেকে জেলার বিস্তারিত ডাটা লোড করা
-async function loadMeta() {
-    try {
-        const res = await fetch('./data/districts.json');
-        districtData = await res.json();
-    } catch (err) {
-        console.error("Error loading districts metadata:", err);
-    }
-}
-loadMeta();
+// 1. districts.json theke data load kora
+fetch('./data/districts.json')
+    .then(res => res.json())
+    .then(data => {
+        districtData = data;
+        console.log("Districts data loaded:", districtData.length);
+    })
+    .catch(err => console.error("Data load error:", err));
 
-// ২. ম্যাপ থেকে ক্লিকের সিগন্যাল রিসিভ করা
+// 2. Map theke click korar signal paile ei event ta kaj korbe
 document.addEventListener('districtSelected', (e) => {
-    // ম্যাপ থেকে আসা জেলার নামটা ছোট হাতের অক্ষরে (lowercase) করে নেওয়া হলো
-    const mapName = e.detail.name.toLowerCase();
-    
-    // আমাদের districts.json এর সাথে ম্যাপের নাম মেলানো
-    const info = districtData.find(d => d.en.toLowerCase() === mapName);
+    const clickedName = e.detail.name;
+    console.log("Map theke click kora zilar nam:", clickedName);
+
+    // json data er sathe map er nam match kora (choto hat er okkhor kore)
+    const info = districtData.find(d => d.en.toLowerCase().trim() === clickedName.toLowerCase().trim());
     
     if (info) {
-        // সাইডবারের HTML এ ডাটাগুলো বসিয়ে দেওয়া
-        document.getElementById('dName').innerText = info.en;
+        console.log("Data match koreche!", info);
+        
+        // 3. Side box er HTML id gulote data bosano
+        document.getElementById('dName').innerText = info.en || '';
         document.getElementById('dBnName').innerText = info.bn || '';
-        document.getElementById('dDivision').innerText = info.division;
-        document.getElementById('dArea').innerText = info.area;
-        document.getElementById('dPop').innerText = info.population.toLocaleString();
+        document.getElementById('dDivision').innerText = info.division || '';
+        document.getElementById('dArea').innerText = info.area || '';
+        document.getElementById('dPop').innerText = info.population ? info.population.toLocaleString() : '';
+        document.getElementById('dGeo').innerText = info.coordinates ? info.coordinates.join(', ') : '';
+        document.getElementById('dUpazilaCount').innerText = info.upazilas || '0';
         
-        // Geo Location
-        if(info.coordinates) {
-            document.getElementById('dGeo').innerText = `${info.coordinates[0]}, ${info.coordinates[1]}`;
-        }
-        
-        // Upazilas
-        document.getElementById('dUpazilaCount').innerText = info.upazilas;
-        const upazilaList = document.getElementById('dUpazilaList');
-        upazilaList.innerHTML = ''; // আগের উপজেলার ব্যাজগুলো মুছে ফেলা
-        
-        if(info.upazila_names && info.upazila_names.length > 0) {
+        // Upazila list html e add kora
+        const list = document.getElementById('dUpazilaList');
+        list.innerHTML = '';
+        if(info.upazila_names) {
             info.upazila_names.forEach(name => {
                 let li = document.createElement('li');
-                li.innerText = name;
-                upazilaList.appendChild(li);
+                li.textContent = name;
+                list.appendChild(li);
             });
-        } else {
-            upazilaList.innerHTML = '<li>Data not added yet</li>';
         }
 
-        // সাইডবারটি স্ক্রিনে ওপেন করা
-        const infoPanel = document.getElementById('infoPanel');
-        if(infoPanel) infoPanel.classList.remove('closed');
+        // 4. Data bosanor por side box ta open kora
+        document.getElementById('infoPanel').classList.remove('closed');
     } else {
-        console.warn("No extra data found in districts.json for: " + e.detail.name);
+        // Jodi banan vul thake ba data na thake
+        console.warn("Ei zilar data districts.json e pawa jayni:", clickedName);
     }
 });
 
-// ৩. সাইডবার ক্লোজ করার বাটন
-const closeBtn = document.getElementById('closePanel');
-if(closeBtn) {
-    closeBtn.addEventListener('click', () => {
-        document.getElementById('infoPanel').classList.add('closed');
-    });
-}
+// Close button logic (Cross e click korle box bondho hobe)
+document.getElementById('closePanel').addEventListener('click', () => {
+    document.getElementById('infoPanel').classList.add('closed');
+});
