@@ -7,7 +7,6 @@ function getStyle() {
 }
 
 function onEachFeature(feature, layer) {
-    // আপনার ফাইলের সঠিক কী 'adm2_name' ব্যবহার করা হয়েছে
     const districtName = feature.properties.adm2_name; 
 
     if(districtName) {
@@ -15,15 +14,23 @@ function onEachFeature(feature, layer) {
     }
 
     layer.on({
+        // মাউস নিলে ডাটা আপডেট হবে
         mouseover: (e) => { 
             e.target.setStyle({ fillColor: '#7C3AED', fillOpacity: 0.9, color: '#F59E0B', weight: 3 }); 
             e.target.bringToFront(); 
+            
+            // হোভার করলেই সিগন্যাল পাঠানো হচ্ছে
+            if(districtName) {
+                document.dispatchEvent(new CustomEvent('districtSelected', { detail: { name: districtName } }));
+            }
         },
+        // মাউস সরালে স্টাইল রিসেট
         mouseout: (e) => { if (geoJsonLayer) geoJsonLayer.resetStyle(e.target); },
+        
+        // ক্লিকে শুধু জুম হবে
         click: (e) => {
             if(districtName) {
                 map.fitBounds(e.target.getBounds());
-                document.dispatchEvent(new CustomEvent('districtSelected', { detail: { name: districtName } }));
             }
         }
     });
