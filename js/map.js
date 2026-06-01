@@ -1,6 +1,5 @@
 /**
  * Bangladesh Interactive Map Logic
- * Handles GeoJSON loading, hover animations, and click events.
  */
 
 const map = L.map('map', { 
@@ -10,7 +9,7 @@ const map = L.map('map', {
 
 let geoJsonLayer;
 
-// ম্যাপের স্টাইল নির্ধারণ
+// ম্যাপের স্টাইল
 function getStyle() {
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     return { 
@@ -21,17 +20,16 @@ function getStyle() {
     };
 }
 
-// প্রতিটি জেলার জন্য ইভেন্ট লিসেনার
+// জেলার নাম সেট করা এবং ক্লিক ইভেন্ট
 function onEachFeature(feature, layer) {
-    // জেলার নাম খোঁজা (ADM2_EN অথবা NAME_2)
-    const districtName = feature.properties.ADM2_EN || feature.properties.NAME_2;
+    // আপনার ফাইল অনুযায়ী সঠিক প্রপার্টি 'adm2_name' ব্যবহার করা হয়েছে
+    const districtName = feature.properties.adm2_name;
 
     if(districtName) {
         layer.bindTooltip(districtName, { permanent: false, direction: 'center', className: 'map-tooltip' });
     }
 
     layer.on({
-        // মাউস নিলে কালার পরিবর্তন
         mouseover: (e) => { 
             const layer = e.target;
             layer.setStyle({ 
@@ -42,16 +40,15 @@ function onEachFeature(feature, layer) {
             }); 
             layer.bringToFront(); 
         },
-        // মাউস সরিয়ে নিলে কালার রিসেট
         mouseout: (e) => { 
             if (geoJsonLayer) {
                 geoJsonLayer.resetStyle(e.target); 
             }
         },
-        // ক্লিক করলে ইনফরমেশন পাঠানো
         click: (e) => {
             if(districtName) {
                 map.fitBounds(e.target.getBounds());
+                // app.js এ নাম পাঠানোর জন্য ইভেন্ট
                 document.dispatchEvent(new CustomEvent('districtSelected', { 
                     detail: { name: districtName } 
                 }));
@@ -63,9 +60,7 @@ function onEachFeature(feature, layer) {
 // ম্যাপ ডাটা লোড করা
 async function loadMap() {
     try {
-        const response = await fetch('./data/map.json'); // আপনার ফাইলের লোকেশন
-        if (!response.ok) throw new Error("Could not load map data");
-        
+        const response = await fetch('./data/map.json');
         const data = await response.json();
         
         geoJsonLayer = L.geoJSON(data, { 
@@ -73,14 +68,12 @@ async function loadMap() {
             onEachFeature: onEachFeature 
         }).addTo(map);
         
-        // লোডার সরিয়ে দেওয়া
         const loader = document.getElementById('loader');
         if(loader) loader.classList.add('fade-out');
 
     } catch (err) {
-        console.error("Map initialization failed:", err);
+        console.error("Map load error:", err);
     }
 }
 
-// ম্যাপ শুরু করা
 loadMap();
